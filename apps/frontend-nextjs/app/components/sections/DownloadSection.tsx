@@ -94,6 +94,7 @@ export default function DownloadSection({
         <button
           onClick={onNewVideo}
           className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2"
+          data-testid="new-video-button"
         >
           <svg
             className="w-5 h-5"

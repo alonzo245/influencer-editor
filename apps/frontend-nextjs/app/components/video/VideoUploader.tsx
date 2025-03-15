@@ -39,8 +39,9 @@ export default function VideoUploader({ onVideoSelect }: VideoUploaderProps) {
         }`}
       onDragEnter={() => setIsDragging(true)}
       onDragLeave={() => setIsDragging(false)}
+      data-testid="upload-dropzone"
     >
-      <input {...getInputProps()} />
+      <input {...getInputProps()} data-testid="file-input" />
       <div className="space-y-4">
         <svg
           className="mx-auto h-12 w-12 text-gray-400"

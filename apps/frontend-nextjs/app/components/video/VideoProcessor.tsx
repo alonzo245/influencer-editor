@@ -192,8 +192,9 @@ export default function VideoProcessor({
             min="0"
             max="100"
             value={cropPosition}
-            onChange={(e) => setCropPosition(Number(e.target.value))}
+            onChange={(e) => setCropPosition(parseInt(e.target.value))}
             className="w-full"
+            data-testid="crop-slider"
           />
         </label>
 
