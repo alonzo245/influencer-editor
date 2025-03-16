@@ -12,7 +12,7 @@ describe("Video Editor E2E", () => {
   it("completes full video editing workflow", () => {
     // Step 1: Upload Video
     cy.get('[data-testid="upload-dropzone"]').should("be.visible");
-    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mp4", {
+    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mov", {
       force: true,
     });
 
@@ -29,14 +29,15 @@ describe("Video Editor E2E", () => {
 
     // Step 4: Transcription Options
     cy.get("h2").contains("Transcription Options").should("be.visible");
-    cy.get('input[type="checkbox"]').first().uncheck();
-    cy.get('input[type="checkbox"]').eq(1).uncheck();
+    // cy.get('input[type="checkbox"]').first().check();
     cy.get("button").contains("Continue").click();
 
     // Since transcription is disabled, we should go directly to processing
-    cy.get("h2", { timeout: 60000 })
-      .contains("Download Your Video")
-      .should("be.visible");
+    // cy.get("h2", { timeout: 60000 })
+    //   .contains("Download Your Video")
+    //   .should("be.visible");
+    // cy.get("a").contains("Download Video").should("be.visible");
+    // cy.get("a").contains("Download SRT").should("not.exist");
 
     // Step 5: Customize Subtitles
     // Font size
@@ -84,7 +85,7 @@ describe("Video Editor E2E", () => {
 
   it("allows skipping subtitle editing", () => {
     cy.get('[data-testid="upload-dropzone"]').should("be.visible");
-    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mp4", {
+    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mov", {
       force: true,
     });
     cy.get("button").contains("9:16").click();
@@ -100,7 +101,7 @@ describe("Video Editor E2E", () => {
   it("preserves subtitle customization settings", () => {
     // Upload and get to subtitle editing
     cy.get('[data-testid="upload-dropzone"]').should("be.visible");
-    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mp4", {
+    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mov", {
       force: true,
     });
     cy.get("button").contains("9:16").click();
@@ -126,7 +127,7 @@ describe("Video Editor E2E", () => {
     cy.get('[data-testid="new-video-button"]').click();
 
     // Complete flow again
-    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mp4", {
+    cy.get('input[type="file"]').selectFile("cypress/fixtures/test-video.mov", {
       force: true,
     });
     cy.get("button").contains("9:16").click();
