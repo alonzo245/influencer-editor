@@ -488,10 +488,12 @@ export default function Home() {
         {currentSection === "download" && processedFiles.videoUrl && (
           <DownloadSection
             videoUrl={processedFiles.videoUrl}
+            filename={`processed_${processedFiles.videoUrl}.mp4`}
             srtUrl={processedFiles.srtUrl}
             transcriptUrl={processedFiles.transcriptUrl}
             onNewVideo={handleNewVideo}
             onBackToEdit={handleBackToEdit}
+            fileId={videoMetadata?.fileId || ""}
           />
         )}
       </div>

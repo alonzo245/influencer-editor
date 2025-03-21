@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface DownloadSectionProps {
   videoUrl: string;
   filename: string;
@@ -7,6 +9,7 @@ interface DownloadSectionProps {
   transcriptUrl?: string;
   onNewVideo: () => void;
   onBackToEdit: () => void;
+  fileId: string;
 }
 
 export default function DownloadSection({
@@ -16,14 +19,76 @@ export default function DownloadSection({
   transcriptUrl,
   onNewVideo,
   onBackToEdit,
+  fileId,
 }: DownloadSectionProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDeleteFiles = async () => {
+    try {
+      setIsDeleting(true);
+      setError(null);
+
+      const response = await fetch(`/api/v1/files/${fileId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail?.message || "Failed to delete files");
+      }
+
+      // If deletion is successful, redirect to upload new video
+      onNewVideo();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete files");
+      console.error("Error deleting files:", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteAllFiles = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete all files? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsDeletingAll(true);
+      setError(null);
+
+      const response = await fetch(`http://localhost:8000/api/files/all`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.detail?.message || "Failed to delete all files"
+        );
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete all files"
+      );
+      console.error("Error deleting all files:", err);
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   return (
     <div className="mt-6 text-center">
       <p className="text-gray-300 mb-4">Your files are ready!</p>
       <div className="space-y-3">
         {/* Download Video Button */}
         <a
-          href={`/api/v1/files/${filename}`}
+          href={videoUrl}
           download
           className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
         >
@@ -42,54 +107,6 @@ export default function DownloadSection({
           </svg>
           <span>Download Video</span>
         </a>
-
-        {/* Download SRT Button */}
-        {srtUrl && (
-          <a
-            href={srtUrl}
-            download
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
-            <span>Download Subtitles (SRT)</span>
-          </a>
-        )}
-
-        {/* Download Transcript Button */}
-        {transcriptUrl && (
-          <a
-            href={transcriptUrl}
-            download
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
-            <span>Download Transcript (TXT)</span>
-          </a>
-        )}
 
         {/* Divider */}
         <div className="border-t border-gray-600 my-4" />
@@ -118,11 +135,16 @@ export default function DownloadSection({
             <span>Back to Edit Subtitles</span>
           </button>
 
-          {/* Upload New Video Button */}
+          {/* Delete All Files Button */}
           <button
-            onClick={onNewVideo}
-            className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2"
-            data-testid="new-video-button"
+            onClick={handleDeleteAllFiles}
+            disabled={isDeletingAll}
+            className={`w-full bg-red-800 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2 ${
+              isDeletingAll
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-red-900"
+            }`}
+            data-testid="delete-all-files-button"
           >
             <svg
               className="w-5 h-5"
@@ -134,11 +156,16 @@ export default function DownloadSection({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M12 4v16m8-8H4"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
               />
             </svg>
-            <span>Upload New Video</span>
+            <span>
+              {isDeletingAll ? "Deleting All..." : "Delete All Files"}
+            </span>
           </button>
+
+          {/* Error Message */}
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
         </div>
       </div>
     </div>

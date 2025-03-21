@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 import uuid
 import time
+import shutil
 
 from ..models.subtitles import ProcessVideoRequest, TranscribeRequest
 from ..services.video_processor import crop_video
@@ -150,6 +151,67 @@ async def download_file(filename: str):
             status_code=500,
             detail={
                 "message": "Failed to download file",
+                "error": str(e)
+            }
+        )
+
+@router.delete("/files/{file_id}")
+async def delete_files(file_id: str):
+    """Delete all files associated with the given file ID."""
+    try:
+        deleted_files = []
+        
+        # Remove uploaded file
+        for file in UPLOAD_DIR.glob(f"{file_id}_*"):
+            try:
+                file.unlink()
+                deleted_files.append(str(file))
+                logger.info(f"Deleted uploaded file: {file}")
+            except Exception as e:
+                logger.error(f"Error removing uploaded file {file}: {str(e)}")
+
+        # Remove processed file
+        for file in OUTPUT_DIR.glob(f"processed_{file_id}_*.mp4"):
+            try:
+                file.unlink()
+                deleted_files.append(str(file))
+                logger.info(f"Deleted processed file: {file}")
+            except Exception as e:
+                logger.error(f"Error removing processed file {file}: {str(e)}")
+
+        # Remove transcript files
+        for file in TRANSCRIPTS_DIR.glob(f"transcript_{file_id}.*"):
+            try:
+                file.unlink()
+                deleted_files.append(str(file))
+                logger.info(f"Deleted transcript file: {file}")
+            except Exception as e:
+                logger.error(f"Error removing transcript file {file}: {str(e)}")
+        
+        if not deleted_files:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "message": "No files found",
+                    "error": f"No files found for ID: {file_id}"
+                }
+            )
+        
+        return {
+            "success": True,
+            "data": {
+                "deleted_files": deleted_files
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Cleanup error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Failed to clean up files",
                 "error": str(e)
             }
         ) 

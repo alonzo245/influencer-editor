@@ -733,7 +733,7 @@ async def download_file(filename: str):
             }
         )
 
-@app.delete("/api/files/{file_id}")
+@app.delete("/api/files")
 async def delete_files(file_id: str):
     """Delete all files associated with the given file ID"""
     try:
@@ -841,6 +841,56 @@ async def transcribe_video(file_id: str, request: TranscribeRequest):
             status_code=500,
             detail={
                 "message": "Failed to process request",
+                "error": str(e)
+            }
+        )
+
+@app.delete("/api/files/all")
+async def delete_all_files():
+    """Delete all files in outputs and uploads directories"""
+    try:
+        deleted_files = []
+        
+        # Remove all files from uploads directory
+        for file in UPLOAD_DIR.glob("*"):
+            try:
+                file.unlink()
+                deleted_files.append(str(file))
+                logger.info(f"Deleted file: {file}")
+            except Exception as e:
+                logger.error(f"Error removing file {file}: {str(e)}")
+
+        # Remove all files from outputs directory
+        for file in OUTPUT_DIR.glob("*"):
+            try:
+                file.unlink()
+                deleted_files.append(str(file))
+                logger.info(f"Deleted file: {file}")
+            except Exception as e:
+                logger.error(f"Error removing file {file}: {str(e)}")
+
+        # Remove all files from transcripts directory
+        for file in TRANSCRIPTS_DIR.glob("*"):
+            try:
+                file.unlink()
+                deleted_files.append(str(file))
+                logger.info(f"Deleted file: {file}")
+            except Exception as e:
+                logger.error(f"Error removing file {file}: {str(e)}")
+        
+        return {
+            "success": True,
+            "data": {
+                "deleted_files": deleted_files,
+                "message": f"Successfully deleted {len(deleted_files)} files"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Cleanup error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Failed to clean up files",
                 "error": str(e)
             }
         ) 
