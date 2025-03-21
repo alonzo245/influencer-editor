@@ -2,6 +2,7 @@
 
 interface DownloadSectionProps {
   videoUrl: string;
+  filename: string;
   srtUrl?: string;
   transcriptUrl?: string;
   onNewVideo: () => void;
@@ -10,6 +11,7 @@ interface DownloadSectionProps {
 
 export default function DownloadSection({
   videoUrl,
+  filename,
   srtUrl,
   transcriptUrl,
   onNewVideo,
@@ -21,7 +23,7 @@ export default function DownloadSection({
       <div className="space-y-3">
         {/* Download Video Button */}
         <a
-          href={videoUrl}
+          href={`/api/v1/files/${filename}`}
           download
           className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
         >
