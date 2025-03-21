@@ -366,12 +366,26 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
             create_custom_srt_file(subtitles_data.text, temp_srt_path)
             
             if temp_srt_path and temp_srt_path.exists():
+                # Convert hex colors to FFmpeg format (AABBGGRR)
+                def hex_to_ffmpeg_color(hex_color: str) -> str:
+                    # Remove the # if present
+                    hex_color = hex_color.lstrip('#')
+                    # Convert RGB to BGR and add alpha
+                    r = hex_color[0:2]
+                    g = hex_color[2:4]
+                    b = hex_color[4:6]
+                    # FFmpeg uses AABBGGRR format where AA is alpha (FF for full opacity)
+                    return f"&H00{b}{g}{r}&"
+                
+                primary_color = hex_to_ffmpeg_color(subtitles_data.styles.color)
+                outline_color = hex_to_ffmpeg_color(subtitles_data.styles.borderColor)
+                
                 # Create subtitle filter with styling
                 subtitle_style = (
                     f"FontName=Arial,"
                     f"FontSize={subtitles_data.styles.fontSize},"
-                    f"PrimaryColour=&H{subtitles_data.styles.color[1:]}FF&,"
-                    f"OutlineColour=&H{subtitles_data.styles.borderColor[1:]}FF&,"
+                    f"PrimaryColour={primary_color},"
+                    f"OutlineColour={outline_color},"
                     f"Outline={subtitles_data.styles.borderSize},"
                     f"MarginV={subtitles_data.styles.marginV},"
                     f"Alignment={subtitles_data.styles.alignment}"
@@ -384,6 +398,9 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                     f"[0:a]volume={volume_factor}[a]"
                 ]
                 logger.info(f"Added subtitle filter with path: {srt_path_str}")
+                logger.info(f"Subtitle style: {subtitle_style}")
+                logger.info(f"Primary color: {primary_color}")
+                logger.info(f"Outline color: {outline_color}")
             else:
                 filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
         else:
