@@ -12,7 +12,6 @@ import whisper
 import time
 import re
 
-FONT_PATH = Path(__file__).parent.parent / "static" / "fonts" / "Dalila.ttf"
 FONTS_DIR_PATH = Path(__file__).parent.parent / "static" / "fonts"
 
 
@@ -162,6 +161,7 @@ class SubtitleStyles(BaseModel):
     textDirection: str
     marginV: int  # Range 0-200
     alignment: str  # "2", "5", or "8"
+    fontType: str
 
 class SubtitlesData(BaseModel):
     text: str
@@ -402,9 +402,10 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                 alignment = int(subtitles_data.styles.alignment)
                 
                 # Create subtitle filter with styling
+                logger.info(f"FontType: {subtitles_data.styles.fontType}")
                 subtitle_style = (
-                    f"FontName=Dalila,"
-                    f"FontFile={FONT_PATH},"
+                    f"FontName={str(subtitles_data.styles.fontType)},"
+                    f"FontFile={FONTS_DIR_PATH}/{str(subtitles_data.styles.fontType)}.ttf,"
                     f"Fontsdir={FONTS_DIR_PATH},"
                     f"FontSize={int(subtitles_data.styles.fontSize)},"
                     f"PrimaryColour={primary_color},"

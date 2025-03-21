@@ -1,5 +1,6 @@
 "use client";
 
+import { ProcessingOptions, SUBTITLE_FONTS } from "@/app/lib/types";
 import { useState, useEffect, useRef } from "react";
 
 interface SubtitlesSectionProps {
@@ -22,6 +23,7 @@ interface SubtitleStyles {
   textDirection: "ltr" | "rtl";
   marginV: number; // Range 0-200
   alignment: "2" | "5" | "8"; // 2=bottom center, 5=middle center, 8=top center
+  fontType: string;
 }
 
 export default function SubtitlesSection({
@@ -34,6 +36,7 @@ export default function SubtitlesSection({
   videoRatio,
 }: SubtitlesSectionProps) {
   const [subtitleText, setSubtitleText] = useState<string>(srtContent || "");
+
   const [volume, setVolume] = useState(100);
   const [styles, setStyles] = useState<SubtitleStyles>(
     initialStyles || {
@@ -46,6 +49,7 @@ export default function SubtitlesSection({
       textDirection: "rtl",
       marginV: 100, // Default to middle
       alignment: "2", // Default to middle center
+      fontType: "MarzipanRegular",
     }
   );
   const [isPlaying, setIsPlaying] = useState(false);
@@ -325,6 +329,25 @@ export default function SubtitlesSection({
                   <span>{styles.marginV}</span>
                   <span>200</span>
                 </div>
+              </div>
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Subtitle Font
+                </label>
+                <select
+                  value={styles.fontType}
+                  onChange={(e) =>
+                    handleStyleChange("fontType", e.target.value)
+                  }
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-200"
+                >
+                  {SUBTITLE_FONTS.map((font: string) => (
+                    <option key={font} value={font}>
+                      {font}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

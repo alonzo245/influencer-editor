@@ -32,6 +32,7 @@ interface SubtitleStyles {
   textDirection: "ltr" | "rtl";
   marginV: number;
   alignment: "2" | "5" | "8";
+  fontType: string;
 }
 
 export default function Home() {
@@ -84,6 +85,7 @@ export default function Home() {
     textDirection: "rtl",
     marginV: 100, // Default to middle
     alignment: "2", // Default to middle center
+    fontType: "MarzipanRegular",
   });
 
   useEffect(() => {
@@ -192,8 +194,9 @@ export default function Home() {
               borderColor: "#000000",
               verticalPosition: 90,
               volume: 100,
-              marginV: 100, // Default to middle
-              alignment: "2", // Default to middle center
+              marginV: 100,
+              alignment: "2",
+              fontType: "MarzipanRegular",
             },
           });
           setCurrentSection("edit");
@@ -240,6 +243,7 @@ export default function Home() {
         textDirection: "rtl",
         marginV: 40,
         alignment: "2" as const,
+        fontType: "MarzipanRegular",
       };
 
       const requestBody = {
