@@ -206,7 +206,7 @@ export default function SubtitlesSection({
           </a>
           <textarea
             className="w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-black"
-            value={"תקן שגיאות כתיב ב srt הבא: "}
+            value={"תקן שגיאות כתיב ב srt הבא ואל תוסיף מקפים: "}
           />
           <textarea
             id="subtitle-text"
