@@ -175,8 +175,53 @@ class TranscribeRequest(BaseModel):
 
 def create_custom_srt_file(text: str, output_path: Path) -> Path:
     """Create SRT file from custom subtitle text."""
+    # Split text into lines and process each subtitle entry
+    lines = text.split('\n')
+    subtitle_entries = []
+    current_entry = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            if current_entry:
+                subtitle_entries.append(current_entry)
+                current_entry = []
+        elif line.isdigit() and len(current_entry) == 0:
+            # This is a subtitle number
+            current_entry.append(line)
+        elif ' --> ' in line:
+            # This is a timestamp line
+            if len(current_entry) == 1:  # We have the subtitle number
+                current_entry.append(line)
+            else:
+                # If we somehow get a timestamp without a number, start a new entry
+                if current_entry:
+                    subtitle_entries.append(current_entry)
+                current_entry = [str(len(subtitle_entries) + 1), line]
+        else:
+            # This is a text line
+            if len(current_entry) >= 2:  # We have number and timestamp
+                current_entry.append(line)
+            else:
+                # If we somehow get text without number and timestamp, skip it
+                continue
+    
+    # Add the last entry if exists
+    if current_entry:
+        subtitle_entries.append(current_entry)
+    
+    # Write the SRT file
     with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(text)
+        for entry in subtitle_entries:
+            if len(entry) >= 3:  # Ensure we have number, timestamp, and text
+                f.write(f"{entry[0]}\n")  # Subtitle number
+                f.write(f"{entry[1]}\n")  # Timestamp
+                f.write(f"{entry[2]}\n")  # Text
+                if len(entry) > 3:  # Additional text lines
+                    for text_line in entry[3:]:
+                        f.write(f"{text_line}\n")
+                f.write("\n")
+    
     return output_path
 
 def create_custom_ass_file(srt_path: Path, styles: SubtitleStyles, output_path: Path) -> Path:
@@ -310,34 +355,48 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
     # Calculate volume factor (1.0 = 100%)
     volume_factor = volume / 100
 
-    # Base video processing command
-    filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
-    
     # Handle subtitles
     temp_srt_path = None
-    temp_ass_path = None
     
     try:
         if burn_subtitles and subtitles_data:
             # Use custom subtitles
             logger.info("Using custom subtitles")
             temp_srt_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.srt"
-            temp_ass_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.ass"
-            
             create_custom_srt_file(subtitles_data.text, temp_srt_path)
-            create_custom_ass_file(temp_srt_path, subtitles_data.styles, temp_ass_path)
             
-            if temp_ass_path and temp_ass_path.exists():
-                filter_complex[0] += f";[v]ass='{temp_ass_path}'[v]"
+            if temp_srt_path and temp_srt_path.exists():
+                # Create subtitle filter with styling
+                subtitle_style = (
+                    f"FontName=Arial,"
+                    f"FontSize={subtitles_data.styles.fontSize},"
+                    f"PrimaryColour=&H{subtitles_data.styles.color[1:]}FF&,"
+                    f"OutlineColour=&H{subtitles_data.styles.borderColor[1:]}FF&,"
+                    f"Outline={subtitles_data.styles.borderSize},"
+                    f"MarginV={subtitles_data.styles.marginV},"
+                    f"Alignment={subtitles_data.styles.alignment}"
+                )
+                
+                # Add subtitle filter with proper escaping
+                srt_path_str = str(temp_srt_path).replace('\\', '/').replace(':', '\\:')
+                filter_complex = [
+                    f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset},subtitles='{srt_path_str}':force_style='{subtitle_style}'[v];",
+                    f"[0:a]volume={volume_factor}[a]"
+                ]
+                logger.info(f"Added subtitle filter with path: {srt_path_str}")
+            else:
+                filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
+        else:
+            filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
     except Exception as e:
         logger.error(f"Subtitle processing error: {str(e)}")
-        # Continue without subtitles if there's an error
+        filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
     
     cmd = [
         "ffmpeg",
         "-y",
         "-i", input_path,
-        "-filter_complex", filter_complex[0],
+        "-filter_complex", "".join(filter_complex),
         "-map", "[v]",
         "-map", "[a]",
         "-c:v", "libx264",
@@ -355,12 +414,11 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
     result = subprocess.run(cmd, capture_output=True, text=True)
     
     # Clean up temporary files
-    for temp_file in [temp_srt_path, temp_ass_path]:
-        if temp_file and temp_file.exists():
-            try:
-                temp_file.unlink()
-            except Exception as e:
-                logger.warning(f"Could not clean up temporary file {temp_file}: {e}")
+    if temp_srt_path and temp_srt_path.exists():
+        try:
+            temp_srt_path.unlink()
+        except Exception as e:
+            logger.warning(f"Could not clean up temporary SRT file {temp_srt_path}: {e}")
     
     if result.returncode != 0:
         logger.error(f"FFmpeg error output: {result.stderr}")
