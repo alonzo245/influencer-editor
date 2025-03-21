@@ -40,3 +40,5 @@ outputs/
 .DS_Store
 Thumbs.db 
 .cursor/
+fonts/
+app/static/fonts/

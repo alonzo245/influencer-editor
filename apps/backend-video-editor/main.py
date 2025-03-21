@@ -12,6 +12,10 @@ import whisper
 import time
 import re
 
+FONT_PATH = Path(__file__).parent.parent / "static" / "fonts" / "Dalila.ttf"
+FONTS_DIR_PATH = Path(__file__).parent.parent / "static" / "fonts"
+
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -399,7 +403,9 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                 
                 # Create subtitle filter with styling
                 subtitle_style = (
-                    f"FontName=Arial,"
+                    f"FontName=Dalila,"
+                    f"FontFile={FONT_PATH},"
+                    f"Fontsdir={FONTS_DIR_PATH},"
                     f"FontSize={int(subtitles_data.styles.fontSize)},"
                     f"PrimaryColour={primary_color},"
                     f"OutlineColour={outline_color},"
@@ -412,9 +418,7 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                     f"Italic=0,"
                     f"Spacing=0,"
                     f"BorderStyle=1,"
-                    f"Shadow=0,"
-                    f"MarginH=0"
-                )
+                    f"Shadow=0,"                )
                 
                 # Add subtitle filter with proper escaping
                 srt_path_str = str(temp_srt_path).replace('\\', '/').replace(':', '\\:')
@@ -423,7 +427,7 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                     f"[0:a]volume={volume_factor}[a]"
                 ]
                 logger.info(f"Added subtitle filter with path: {srt_path_str}")
-                logger.info(f"Subtitle style: {subtitle_style}")
+                logger.info(f"$$$$$$$$$$$$$$$$$$$$ {subtitle_style} @@@@@@@@@@@@@@@@@@@@@@@@")
             else:
                 filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
         else:
