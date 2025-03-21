@@ -1,5 +1,6 @@
 "use client";
 
+import { INITIAL_SUBTITLE_FONTS } from "@/app/lib/consts";
 import { ProcessingOptions, SUBTITLE_FONTS } from "@/app/lib/types";
 import { useState, useEffect, useRef } from "react";
 
