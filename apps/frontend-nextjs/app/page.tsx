@@ -19,14 +19,17 @@ type VideoMetadata = {
 
 type TranscriptionData = {
   text: string;
-  styles: {
-    fontSize: number;
-    color: string;
-    borderSize: number;
-    borderColor: string;
-    verticalPosition: number;
-    volume: number;
-  };
+  styles: SubtitleStyles;
+};
+
+type SubtitleStyles = {
+  fontSize: number;
+  color: string;
+  borderSize: number;
+  borderColor: string;
+  verticalPosition: number;
+  volume: number;
+  textDirection: "ltr" | "rtl";
 };
 
 export default function Home() {
@@ -64,6 +67,20 @@ export default function Home() {
   }>({});
   const [error, setError] = useState<string>("");
   const [shouldProcessVideo, setShouldProcessVideo] = useState(false);
+
+  // Add state for subtitle styles
+  const [subtitleText, setSubtitleText] = useState<string>("");
+  const [subtitleStyles, setSubtitleStyles] = useState<
+    SubtitleStyles | undefined
+  >({
+    fontSize: 24,
+    color: "#FFFFFF",
+    borderSize: 2,
+    borderColor: "#000000",
+    verticalPosition: 90,
+    volume: 100,
+    textDirection: "ltr",
+  });
 
   useEffect(() => {
     if (shouldProcessVideo && transcriptionData) {
@@ -170,6 +187,7 @@ export default function Home() {
               borderColor: "#000000",
               verticalPosition: 40,
               volume: 100,
+              textDirection: lang === "hebrew" ? "rtl" : "ltr",
             },
           });
           setCurrentSection("edit");
@@ -191,7 +209,7 @@ export default function Home() {
   const handleTranscriptionEdit = (
     text: string,
     volume: number,
-    styles: TranscriptionData["styles"]
+    styles: SubtitleStyles
   ) => {
     setTranscriptionData({ text, styles });
     setShouldProcessVideo(true);
@@ -284,6 +302,32 @@ export default function Home() {
       }
     };
   }, []); // Empty dependency array to only run on unmount
+
+  // Update the handleBackToEdit function
+  const handleBackToEdit = () => {
+    setCurrentSection("edit");
+    // Restore the previous subtitle text and styles
+    if (transcriptionData) {
+      setTranscriptionData(transcriptionData);
+    }
+    if (subtitleStyles) {
+      setSubtitleStyles({
+        ...subtitleStyles,
+        textDirection: subtitleStyles.textDirection || "ltr", // Ensure textDirection is set
+      });
+    }
+  };
+
+  // Update the handleSaveSubtitles function
+  const handleSaveSubtitles = (
+    text: string,
+    volume: number,
+    styles: SubtitleStyles
+  ) => {
+    setSubtitleText(text);
+    setSubtitleStyles(styles);
+    setCurrentSection("process"); // Changed from "processing" to "process" to match the type
+  };
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -420,12 +464,13 @@ export default function Home() {
           <ProgressBar progress={progress} text="Processing video..." />
         )}
 
-        {currentSection === "download" && (
+        {currentSection === "download" && processedFiles.videoUrl && (
           <DownloadSection
-            onNewVideo={handleNewVideo}
             videoUrl={processedFiles.videoUrl}
             srtUrl={processedFiles.srtUrl}
             transcriptUrl={processedFiles.transcriptUrl}
+            onNewVideo={handleNewVideo}
+            onBackToEdit={handleBackToEdit}
           />
         )}
       </div>

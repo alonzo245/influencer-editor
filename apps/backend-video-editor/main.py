@@ -9,6 +9,7 @@ from pathlib import Path
 import logging
 from typing import Optional
 import whisper
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -152,6 +153,10 @@ class SubtitleStyles(BaseModel):
     borderSize: int
     borderColor: str
     verticalPosition: int
+    volume: int
+    textDirection: str
+    marginV: int  # Range 0-200
+    alignment: str  # "2", "5", or "8"
 
 class SubtitlesData(BaseModel):
     text: str
@@ -211,21 +216,68 @@ def create_custom_ass_file(srt_path: Path, styles: SubtitleStyles, output_path: 
         ass_font_color = rgb_to_ass_color(font_color)
         ass_border_color = rgb_to_ass_color(border_color)
         
-        # Calculate margin based on vertical position (0-100)
-        # ASS uses margin from bottom, which matches our verticalPosition
-        margin_v = int((styles.verticalPosition / 100) * 100)  # Scale to reasonable margin range (0-60)
+        # Use the provided margin_v and alignment values
+        margin_v = styles.marginV
+        alignment = styles.alignment
         
         # Create new style line with custom properties
         # Format: Name, Font, Size, Primary, Secondary, Outline, Back, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-        new_style = f"Style: Default,Arial,{styles.fontSize},{ass_font_color},&H000000FF&,{ass_border_color},&H00000000&,0,0,0,0,100,100,0,0,1,{styles.borderSize},0,2,10,10,{margin_v},1\n"
+        new_style = f"Style: Default,Arial,{styles.fontSize},{ass_font_color},&H000000FF&,{ass_border_color},&H00000000&,0,0,0,0,100,100,0,0,1,{styles.borderSize},0,{alignment},10,10,{margin_v},1\n"
         
         ass_content[style_line_index] = new_style
+        
+        # Process RTL text if needed
+        if styles.textDirection == "rtl":
+            for i, line in enumerate(ass_content):
+                if line.startswith("Dialogue:"):
+                    # Split the dialogue line into parts
+                    parts = line.split(",", 9)  # Split into 10 parts (Dialogue: + 9 style parameters)
+                    if len(parts) == 10:
+                        # Process the text part (last part)
+                        text = parts[9].strip()
+                        processed_text = process_rtl_text(text)
+                        parts[9] = processed_text
+                        ass_content[i] = ",".join(parts)
         
         # Write modified content back to file
         with open(output_path, 'w', encoding='utf-8') as f:
             f.writelines(ass_content)
     
     return output_path
+
+def process_rtl_text(text: str) -> str:
+    """Process text to handle RTL (Hebrew) text properly."""
+    if not text:
+        return text
+        
+    # Split text into sentences
+    sentences = []
+    current_sentence = ""
+    punctuation = ""
+    
+    # Process text from right to left
+    for i in range(len(text) - 1, -1, -1):
+        char = text[i]
+        if char in "?!.":
+            if current_sentence:
+                # Add punctuation before the sentence
+                sentences.append(char + " " + current_sentence.strip())
+                current_sentence = ""
+            else:
+                punctuation = char
+        else:
+            current_sentence = char + current_sentence
+    
+    # Add the last sentence if exists
+    if current_sentence:
+        if punctuation:
+            sentences.append(punctuation + " " + current_sentence.strip())
+        else:
+            sentences.append(current_sentence.strip())
+    
+    # Join sentences with proper spacing
+    result = " ".join(sentences)
+    return result
 
 def crop_video(input_path: str, output_path: str, target_ratio: str, position: float = 50, volume: float = 100, language: Optional[str] = None, burn_subtitles: bool = False, subtitles_data: Optional[SubtitlesData] = None):
     """Crop video to target aspect ratio, adjust volume, and optionally burn in subtitles."""
@@ -266,32 +318,14 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
     temp_ass_path = None
     
     try:
-        if burn_subtitles:
-            if subtitles_data:
-                # Use custom subtitles
-                logger.info("Using custom subtitles")
-                temp_srt_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.srt"
-                temp_ass_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.ass"
-                
-                create_custom_srt_file(subtitles_data.text, temp_srt_path)
-                create_custom_ass_file(temp_srt_path, subtitles_data.styles, temp_ass_path)
-            elif language:
-                # Use whisper transcription
-                logger.info(f"Generating subtitles with language: {language}")
-                temp_srt_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.srt"
-                temp_ass_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.ass"
-                
-                result = transcribe_audio(str(input_path), language)
-                create_srt_file(result["segments"], temp_srt_path)
-                
-                # Convert SRT to ASS
-                convert_cmd = [
-                    "ffmpeg",
-                    "-y",
-                    "-i", str(temp_srt_path),
-                    str(temp_ass_path)
-                ]
-                subprocess.run(convert_cmd, check=True, capture_output=True)
+        if burn_subtitles and subtitles_data:
+            # Use custom subtitles
+            logger.info("Using custom subtitles")
+            temp_srt_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.srt"
+            temp_ass_path = TRANSCRIPTS_DIR / f"temp_{uuid.uuid4()}.ass"
+            
+            create_custom_srt_file(subtitles_data.text, temp_srt_path)
+            create_custom_ass_file(temp_srt_path, subtitles_data.styles, temp_ass_path)
             
             if temp_ass_path and temp_ass_path.exists():
                 filter_complex[0] += f";[v]ass='{temp_ass_path}'[v]"
@@ -502,7 +536,18 @@ async def process_video(
             )
         
         input_path = input_files[0]
-        output_path = OUTPUT_DIR / f"processed_{file_id}.mp4"
+        
+        # Create unique output path with timestamp
+        timestamp = int(time.time())
+        output_path = OUTPUT_DIR / f"processed_{file_id}_{timestamp}.mp4"
+        
+        # Clean up any existing processed files for this video
+        for old_file in OUTPUT_DIR.glob(f"processed_{file_id}_*.mp4"):
+            try:
+                old_file.unlink()
+                logger.info(f"Cleaned up old processed file: {old_file}")
+            except Exception as e:
+                logger.warning(f"Could not clean up old file {old_file}: {e}")
         
         # Process video
         crop_video(
@@ -521,14 +566,14 @@ async def process_video(
         
         # Save custom subtitles if provided
         if request.subtitles:
-            # Save SRT file
-            srt_path = TRANSCRIPTS_DIR / f"transcript_{file_id}.srt"
+            # Save SRT file with timestamp
+            srt_path = TRANSCRIPTS_DIR / f"transcript_{file_id}_{timestamp}.srt"
             with open(srt_path, 'w', encoding='utf-8') as f:
                 f.write(request.subtitles.text)
             transcript_files["srt"] = str(srt_path)
             
-            # Save TXT file (without timecodes)
-            txt_path = TRANSCRIPTS_DIR / f"transcript_{file_id}.txt"
+            # Save TXT file with timestamp
+            txt_path = TRANSCRIPTS_DIR / f"transcript_{file_id}_{timestamp}.txt"
             with open(txt_path, 'w', encoding='utf-8') as f:
                 # Extract only the text lines from SRT format
                 lines = request.subtitles.text.split('\n')
@@ -536,22 +581,20 @@ async def process_video(
                     if line and not line.isdigit() and not ' --> ' in line:
                         f.write(line + '\n')
             transcript_files["txt"] = str(txt_path)
-        # Generate transcripts if requested (only for whisper transcription)
-        elif request.language and not request.burn_subtitles:
-            try:
-                result = transcribe_audio(str(input_path), request.language)
-                
-                # Create SRT file
-                srt_path = TRANSCRIPTS_DIR / f"transcript_{file_id}.srt"
-                create_srt_file(result["segments"], srt_path)
-                transcript_files["srt"] = str(srt_path)
-                
-                # Create TXT file
-                txt_path = TRANSCRIPTS_DIR / f"transcript_{file_id}.txt"
-                create_txt_file(result["segments"], txt_path)
-                transcript_files["txt"] = str(txt_path)
-            except Exception as e:
-                logger.error(f"Transcription error: {str(e)}")
+            
+            # Clean up old transcript files
+            for old_file in TRANSCRIPTS_DIR.glob(f"transcript_{file_id}_*.srt"):
+                try:
+                    old_file.unlink()
+                    logger.info(f"Cleaned up old SRT file: {old_file}")
+                except Exception as e:
+                    logger.warning(f"Could not clean up old SRT file {old_file}: {e}")
+            for old_file in TRANSCRIPTS_DIR.glob(f"transcript_{file_id}_*.txt"):
+                try:
+                    old_file.unlink()
+                    logger.info(f"Cleaned up old TXT file: {old_file}")
+                except Exception as e:
+                    logger.warning(f"Could not clean up old TXT file {old_file}: {e}")
         
         return {
             "success": True,

@@ -9,6 +9,7 @@ interface SubtitlesSectionProps {
   onSkip: () => void;
   isVisible: boolean;
   localVideoUrl?: string;
+  videoRatio?: string;
 }
 
 interface SubtitleStyles {
@@ -18,6 +19,9 @@ interface SubtitleStyles {
   borderColor: string;
   verticalPosition: number;
   volume: number;
+  textDirection: "ltr" | "rtl";
+  marginV: number; // Range 0-200
+  alignment: "2" | "5" | "8"; // 2=bottom center, 5=middle center, 8=top center
 }
 
 export default function SubtitlesSection({
@@ -27,17 +31,21 @@ export default function SubtitlesSection({
   onSkip,
   isVisible,
   localVideoUrl,
+  videoRatio,
 }: SubtitlesSectionProps) {
   const [subtitleText, setSubtitleText] = useState(srtContent);
   const [volume, setVolume] = useState(100);
   const [styles, setStyles] = useState<SubtitleStyles>(
     initialStyles || {
-      fontSize: 16,
-      color: "#ffffff",
-      borderSize: 1,
+      fontSize: 24,
+      color: "#FFFFFF",
+      borderSize: 2,
       borderColor: "#000000",
       verticalPosition: 90,
       volume: 100,
+      textDirection: "ltr",
+      marginV: 100, // Default to middle
+      alignment: "5", // Default to middle center
     }
   );
   const [isPlaying, setIsPlaying] = useState(false);
@@ -241,26 +249,25 @@ export default function SubtitlesSection({
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-black">
-                  Vertical Position
+                  Verticle Alignment
                 </label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={styles.verticalPosition}
-                  className="w-full"
+                <select
+                  value={styles.alignment}
+                  className="w-full p-2 border border-gray-300 rounded text-black"
                   onChange={(e) =>
-                    handleStyleChange(
-                      "verticalPosition",
-                      parseInt(e.target.value)
-                    )
+                    handleStyleChange("alignment", e.target.value)
                   }
-                />
-                <div className="text-sm text-gray-600 flex justify-between">
-                  <span>Top</span>
-                  <span ref={yValueRef}>{styles.verticalPosition}%</span>
-                  <span>Bottom</span>
-                </div>
+                >
+                  <option value="8" className="text-black">
+                    Top Center
+                  </option>
+                  <option value="5" className="text-black">
+                    Middle Center
+                  </option>
+                  <option value="2" className="text-black">
+                    Bottom Center
+                  </option>
+                </select>
               </div>
 
               <div className="space-y-2">
@@ -281,6 +288,27 @@ export default function SubtitlesSection({
                   <span>Mute</span>
                   <span>{styles.volume}%</span>
                   <span>300%</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-black">
+                  Verticle Padding (0-200)
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={200}
+                  value={styles.marginV}
+                  className="w-full"
+                  onChange={(e) =>
+                    handleStyleChange("marginV", parseInt(e.target.value))
+                  }
+                />
+                <div className="text-sm text-gray-600 flex justify-between">
+                  <span>0</span>
+                  <span>{styles.marginV}</span>
+                  <span>200</span>
                 </div>
               </div>
             </div>
@@ -308,39 +336,41 @@ export default function SubtitlesSection({
             {localVideoUrl && (
               <div>
                 <h4 className="text-lg font-semibold mb-3">Video Preview</h4>
-                <div className="relative bg-gray-900 w-full rounded-lg overflow-hidden shadow-lg">
+                <div
+                  className="relative w-full"
+                  style={{
+                    aspectRatio: videoRatio === "9:16" ? "9/16" : "16/9",
+                    maxWidth: videoRatio === "9:16" ? "400px" : "100%",
+                    margin: "0 auto",
+                  }}
+                >
                   <video
                     ref={videoRef}
                     src={localVideoUrl}
-                    className="w-full"
+                    className="w-full h-full object-contain"
                     controls
                     controlsList="nodownload nofullscreen"
                     playsInline
                   />
-                  <div
-                    className="absolute inset-x-0 px-4 pointer-events-none"
-                    style={{
-                      bottom: `${styles.verticalPosition}%`,
-                    }}
-                  >
+                  {styles && (
                     <div
-                      className="text-center"
+                      className="absolute left-0 right-0 text-center"
                       style={{
+                        bottom: `${styles.verticalPosition}%`,
+                        transform: "translateY(50%)",
                         fontSize: `${styles.fontSize}px`,
                         color: styles.color,
-                        textShadow:
-                          styles.borderSize > 0
-                            ? `0 0 ${styles.borderSize}px ${styles.borderColor}`
-                            : "none",
+                        textShadow: `${styles.borderSize}px ${styles.borderSize}px ${styles.borderSize}px ${styles.borderColor}`,
+                        direction: styles.textDirection,
+                        textAlign: "center",
+                        padding: "0 20px",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
                       }}
                     >
-                      {subtitleText
-                        .split("\n\n")[0]
-                        ?.split("\n")
-                        .slice(2)
-                        .join("\n") || "Sample subtitle text"}
+                      {subtitleText}
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className="mt-2 flex justify-center">
                   <button
