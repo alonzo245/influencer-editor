@@ -22,7 +22,7 @@ type TranscriptionData = {
   styles: SubtitleStyles;
 };
 
-type SubtitleStyles = {
+interface SubtitleStyles {
   fontSize: number;
   color: string;
   borderSize: number;
@@ -30,7 +30,9 @@ type SubtitleStyles = {
   verticalPosition: number;
   volume: number;
   textDirection: "ltr" | "rtl";
-};
+  marginV: number;
+  alignment: "2" | "5" | "8";
+}
 
 export default function Home() {
   // Flow control
@@ -80,6 +82,8 @@ export default function Home() {
     verticalPosition: 90,
     volume: 100,
     textDirection: "ltr",
+    marginV: 100,
+    alignment: "5",
   });
 
   useEffect(() => {
@@ -188,6 +192,8 @@ export default function Home() {
               verticalPosition: 40,
               volume: 100,
               textDirection: lang === "hebrew" ? "rtl" : "ltr",
+              marginV: 100,
+              alignment: "5" as const,
             },
           });
           setCurrentSection("edit");
@@ -223,13 +229,31 @@ export default function Home() {
       setCurrentSection("process");
       setProgress(0);
 
+      // Ensure all required subtitle style fields are included
+      const subtitleStyles: SubtitleStyles = transcriptionData?.styles || {
+        fontSize: 24,
+        color: "#FFFFFF",
+        borderSize: 2,
+        borderColor: "#000000",
+        verticalPosition: 90,
+        volume: 100,
+        textDirection: "ltr",
+        marginV: 100,
+        alignment: "5" as const,
+      };
+
       const requestBody = {
         target_ratio: selectedRatio,
         position: cropPosition,
         volume: transcriptionData?.styles.volume ?? 100,
         language: transcriptionEnabled ? language : undefined,
         burn_subtitles: burnSubtitles,
-        subtitles: transcriptionData,
+        subtitles: transcriptionData
+          ? {
+              text: transcriptionData.text,
+              styles: subtitleStyles,
+            }
+          : undefined,
       };
 
       const response = await fetch(
@@ -331,9 +355,6 @@ export default function Home() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-center mb-8 text-gray-100">
-        Video Editor
-      </h1>
       <div className="max-w-[1200px] mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
         {error && (
           <div className="mb-4 p-4 bg-red-500 text-white rounded-lg">

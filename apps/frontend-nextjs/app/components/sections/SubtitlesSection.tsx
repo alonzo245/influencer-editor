@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 
 interface SubtitlesSectionProps {
-  srtContent?: string;
+  srtContent: string;
   initialStyles?: SubtitleStyles;
   onSave: (subtitles: string, volume: number, styles: SubtitleStyles) => void;
   onSkip: () => void;
@@ -25,7 +25,7 @@ interface SubtitleStyles {
 }
 
 export default function SubtitlesSection({
-  srtContent = "",
+  srtContent,
   initialStyles,
   onSave,
   onSkip,
@@ -33,7 +33,7 @@ export default function SubtitlesSection({
   localVideoUrl,
   videoRatio,
 }: SubtitlesSectionProps) {
-  const [subtitleText, setSubtitleText] = useState(srtContent);
+  const [subtitleText, setSubtitleText] = useState<string>(srtContent || "");
   const [volume, setVolume] = useState(100);
   const [styles, setStyles] = useState<SubtitleStyles>(
     initialStyles || {
@@ -58,9 +58,23 @@ export default function SubtitlesSection({
   const videoRef = useRef<HTMLVideoElement>(null);
   const volumeValueRef = useRef<HTMLSpanElement>(null);
 
+  // Function to extract only subtitle text from SRT format
+  const getSubtitleTextOnly = (srtContent: string) => {
+    return srtContent
+      .split("\n\n")
+      .map((block) => {
+        const lines = block.split("\n");
+        // Skip the first two lines (number and timestamp)
+        return lines.slice(2).join("\n");
+      })
+      .join("\n\n");
+  };
+
   // Update text when srtContent changes
   useEffect(() => {
-    setSubtitleText(srtContent);
+    if (srtContent !== undefined) {
+      setSubtitleText(srtContent);
+    }
   }, [srtContent]);
 
   // Update styles when initialStyles changes
@@ -168,7 +182,7 @@ export default function SubtitlesSection({
           <textarea
             id="subtitle-text"
             className="w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-black"
-            rows={15}
+            rows={10}
             value={subtitleText}
             onChange={(e) => setSubtitleText(e.target.value)}
           />
@@ -337,21 +351,16 @@ export default function SubtitlesSection({
               <div>
                 <h4 className="text-lg font-semibold mb-3">Video Preview</h4>
                 <div
-                  className="relative w-full"
+                  className="relative w-full bg-gray-900 rounded-lg overflow-hidden"
                   style={{
                     aspectRatio: videoRatio === "9:16" ? "9/16" : "16/9",
                     maxWidth: videoRatio === "9:16" ? "400px" : "100%",
                     margin: "0 auto",
+                    width: videoRatio === "9:16" ? "400px" : "800px",
+                    height: videoRatio === "9:16" ? "711px" : "450px",
                   }}
                 >
-                  <video
-                    ref={videoRef}
-                    src={localVideoUrl}
-                    className="w-full h-full object-contain"
-                    controls
-                    controlsList="nodownload nofullscreen"
-                    playsInline
-                  />
+                  <div className="absolute inset-0 flex items-center justify-center"></div>
                   {styles && (
                     <div
                       className="absolute left-0 right-0 text-center"
@@ -368,7 +377,7 @@ export default function SubtitlesSection({
                         wordBreak: "break-word",
                       }}
                     >
-                      {subtitleText}
+                      {getSubtitleTextOnly(subtitleText)}
                     </div>
                   )}
                 </div>
