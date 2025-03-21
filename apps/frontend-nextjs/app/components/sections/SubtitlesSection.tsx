@@ -49,7 +49,7 @@ export default function SubtitlesSection({
       textDirection: "rtl",
       marginV: 100, // Default to middle
       alignment: "2", // Default to middle center
-      fontType: "MarzipanRegular",
+      fontType: INITIAL_SUBTITLE_FONTS,
     }
   );
   const [isPlaying, setIsPlaying] = useState(false);
@@ -336,15 +336,18 @@ export default function SubtitlesSection({
                   Subtitle Font
                 </label>
                 <select
-                  value={styles.fontType}
+                  value={styles.fontType.split("").reverse().join("")}
                   onChange={(e) =>
-                    handleStyleChange("fontType", e.target.value)
+                    handleStyleChange(
+                      "fontType",
+                      e.target.value.split("").reverse().join("")
+                    )
                   }
                   className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-200"
                 >
                   {SUBTITLE_FONTS.map((font: string) => (
                     <option key={font} value={font}>
-                      {font}
+                      {font.split("").reverse()}
                     </option>
                   ))}
                 </select>

@@ -7,6 +7,7 @@ import ProgressBar from "./components/ui/ProgressBar";
 import DownloadSection from "./components/sections/DownloadSection";
 import SubtitlesSection from "./components/sections/SubtitlesSection";
 import type { ProcessingOptions } from "./lib/types";
+import { INITIAL_SUBTITLE_FONTS } from "./lib/consts";
 
 type VideoMetadata = {
   fileId: string;
@@ -85,7 +86,7 @@ export default function Home() {
     textDirection: "rtl",
     marginV: 100, // Default to middle
     alignment: "2", // Default to middle center
-    fontType: "MarzipanRegular",
+    fontType: INITIAL_SUBTITLE_FONTS,
   });
 
   useEffect(() => {
@@ -196,7 +197,7 @@ export default function Home() {
               volume: 100,
               marginV: 100,
               alignment: "2",
-              fontType: "MarzipanRegular",
+              fontType: INITIAL_SUBTITLE_FONTS,
             },
           });
           setCurrentSection("edit");
@@ -243,7 +244,7 @@ export default function Home() {
         textDirection: "rtl",
         marginV: 40,
         alignment: "2" as const,
-        fontType: "MarzipanRegular",
+        fontType: INITIAL_SUBTITLE_FONTS,
       };
 
       const requestBody = {
