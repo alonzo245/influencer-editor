@@ -360,13 +360,31 @@ export default function SubtitlesSection({
                     height: videoRatio === "9:16" ? "711px" : "450px",
                   }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center"></div>
+                  <div
+                    id="mock-video"
+                    className="absolute inset-0 flex items-center justify-center"
+                  ></div>
                   {styles && (
                     <div
+                      id="subtitle-preview"
                       className="absolute left-0 right-0 text-center"
                       style={{
-                        bottom: `${styles.verticalPosition}%`,
-                        transform: "translateY(50%)",
+                        top:
+                          styles.alignment === "8"
+                            ? `${styles.marginV}px`
+                            : "auto",
+                        bottom:
+                          styles.alignment === "2"
+                            ? `${styles.marginV}px`
+                            : "auto",
+                        transform:
+                          styles.alignment === "5"
+                            ? "translateY(-50%)"
+                            : "none",
+                        ...(styles.alignment === "5" && {
+                          top: "50%",
+                          marginTop: `${styles.marginV}px`,
+                        }),
                         fontSize: `${styles.fontSize}px`,
                         color: styles.color,
                         textShadow: `${styles.borderSize}px ${styles.borderSize}px ${styles.borderSize}px ${styles.borderColor}`,
