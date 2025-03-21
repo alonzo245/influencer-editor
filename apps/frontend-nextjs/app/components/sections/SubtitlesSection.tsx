@@ -395,7 +395,7 @@ export default function SubtitlesSection({
                         wordBreak: "break-word",
                       }}
                     >
-                      {getSubtitleTextOnly(subtitleText)}
+                      {` טקסט צריך להיות כאן \n איזה כיף`}
                     </div>
                   )}
                 </div>
