@@ -75,15 +75,15 @@ export default function Home() {
   const [subtitleStyles, setSubtitleStyles] = useState<
     SubtitleStyles | undefined
   >({
-    fontSize: 24,
-    color: "#FFFFFF",
-    borderSize: 2,
+    fontSize: 16,
+    color: "#fcfc00",
+    borderSize: 1,
     borderColor: "#000000",
     verticalPosition: 90,
     volume: 100,
-    textDirection: "ltr",
-    marginV: 100,
-    alignment: "5",
+    textDirection: "rtl",
+    marginV: 100, // Default to middle
+    alignment: "2", // Default to middle center
   });
 
   useEffect(() => {
@@ -185,15 +185,15 @@ export default function Home() {
           setTranscriptionData({
             text: result.data.text,
             styles: {
+              textDirection: lang === "hebrew" ? "rtl" : "ltr",
               fontSize: 16,
-              color: "#FFFFFF",
+              color: "#fcfc00",
               borderSize: 1,
               borderColor: "#000000",
-              verticalPosition: 40,
+              verticalPosition: 90,
               volume: 100,
-              textDirection: lang === "hebrew" ? "rtl" : "ltr",
-              marginV: 100,
-              alignment: "5" as const,
+              marginV: 100, // Default to middle
+              alignment: "2", // Default to middle center
             },
           });
           setCurrentSection("edit");
@@ -231,15 +231,15 @@ export default function Home() {
 
       // Ensure all required subtitle style fields are included
       const subtitleStyles: SubtitleStyles = transcriptionData?.styles || {
-        fontSize: 24,
-        color: "#FFFFFF",
-        borderSize: 2,
+        fontSize: 16,
+        color: "#e1ff00",
+        borderSize: 1,
         borderColor: "#000000",
         verticalPosition: 90,
         volume: 100,
-        textDirection: "ltr",
-        marginV: 100,
-        alignment: "5" as const,
+        textDirection: "rtl",
+        marginV: 40,
+        alignment: "2" as const,
       };
 
       const requestBody = {

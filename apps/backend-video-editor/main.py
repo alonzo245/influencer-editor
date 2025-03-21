@@ -10,6 +10,7 @@ import logging
 from typing import Optional
 import whisper
 import time
+import re
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -174,7 +175,7 @@ class TranscribeRequest(BaseModel):
     language: str
 
 def create_custom_srt_file(text: str, output_path: Path) -> Path:
-    """Create SRT file from custom subtitle text."""
+    """Create SRT file from custom subtitle text with proper RTL formatting."""
     # Split text into lines and process each subtitle entry
     lines = text.split('\n')
     subtitle_entries = []
@@ -199,9 +200,14 @@ def create_custom_srt_file(text: str, output_path: Path) -> Path:
                     subtitle_entries.append(current_entry)
                 current_entry = [str(len(subtitle_entries) + 1), line]
         else:
-            # This is a text line
+            # This is a text line - process it for RTL
             if len(current_entry) >= 2:  # We have number and timestamp
-                current_entry.append(line)
+                # Add RTL control characters to the text
+                rtl_mark = "‏"
+                isolate_start = "⁧"
+                isolate_end = "⁩"
+                processed_text = f"{rtl_mark}{isolate_start}{line.strip()}{isolate_end}"
+                current_entry.append(processed_text)
             else:
                 # If we somehow get text without number and timestamp, skip it
                 continue
@@ -216,7 +222,7 @@ def create_custom_srt_file(text: str, output_path: Path) -> Path:
             if len(entry) >= 3:  # Ensure we have number, timestamp, and text
                 f.write(f"{entry[0]}\n")  # Subtitle number
                 f.write(f"{entry[1]}\n")  # Timestamp
-                f.write(f"{entry[2]}\n")  # Text
+                f.write(f"{entry[2]}\n")  # Text with RTL formatting
                 if len(entry) > 3:  # Additional text lines
                     for text_line in entry[3:]:
                         f.write(f"{text_line}\n")
@@ -291,38 +297,49 @@ def create_custom_ass_file(srt_path: Path, styles: SubtitleStyles, output_path: 
     return output_path
 
 def process_rtl_text(text: str) -> str:
-    """Process text to handle RTL (Hebrew) text properly."""
+    """Process text to handle RTL (Hebrew) text properly with correct punctuation positioning."""
     if not text:
         return text
-        
-    # Split text into sentences
-    sentences = []
-    current_sentence = ""
-    punctuation = ""
-    
-    # Process text from right to left
-    for i in range(len(text) - 1, -1, -1):
-        char = text[i]
-        if char in "?!.":
-            if current_sentence:
-                # Add punctuation before the sentence
-                sentences.append(char + " " + current_sentence.strip())
-                current_sentence = ""
-            else:
-                punctuation = char
-        else:
-            current_sentence = char + current_sentence
-    
-    # Add the last sentence if exists
-    if current_sentence:
-        if punctuation:
-            sentences.append(punctuation + " " + current_sentence.strip())
-        else:
-            sentences.append(current_sentence.strip())
-    
-    # Join sentences with proper spacing
-    result = " ".join(sentences)
-    return result
+
+    rtl_mark = "‏"  # RTL mark
+    isolate_start = "⁧"  # RTL isolate start
+    isolate_end = "⁩"  # RTL isolate end
+
+    lines = text.splitlines()
+    processed_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            processed_lines.append("")
+            continue
+
+        # Move punctuation to the end of the line
+        match = re.match(r"^([!?.,]+)(.+)", stripped)
+        if match:
+            stripped = match.group(2).strip() + match.group(1)
+
+        processed_line = f"{rtl_mark}{isolate_start}{stripped}{isolate_end}"
+        processed_lines.append(processed_line)
+
+    return "\n".join(processed_lines)
+
+def build_ffmpeg_command(input_path: str, output_path: str, filter_complex: list) -> list:
+    """Build FFmpeg command with proper encoding settings."""
+    return [
+        "ffmpeg",
+        "-y",
+        "-i", input_path,
+        "-filter_complex", "".join(filter_complex),
+        "-map", "[v]",
+        "-map", "[a]",
+        "-c:v", "mpeg4",
+        "-q:v", "5",
+        "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart",
+        "-c:a", "aac",
+        "-b:a", "192k",
+        output_path
+    ]
 
 def crop_video(input_path: str, output_path: str, target_ratio: str, position: float = 50, volume: float = 100, language: Optional[str] = None, burn_subtitles: bool = False, subtitles_data: Optional[SubtitlesData] = None):
     """Crop video to target aspect ratio, adjust volume, and optionally burn in subtitles."""
@@ -368,13 +385,10 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
             if temp_srt_path and temp_srt_path.exists():
                 # Convert hex colors to FFmpeg format (AABBGGRR)
                 def hex_to_ffmpeg_color(hex_color: str) -> str:
-                    # Remove the # if present
                     hex_color = hex_color.lstrip('#')
-                    # Convert RGB to BGR and add alpha
                     r = hex_color[0:2]
                     g = hex_color[2:4]
                     b = hex_color[4:6]
-                    # FFmpeg uses AABBGGRR format where AA is alpha (FF for full opacity)
                     return f"&H00{b}{g}{r}&"
                 
                 primary_color = hex_to_ffmpeg_color(subtitles_data.styles.color)
@@ -392,14 +406,14 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                     f"Outline={int(subtitles_data.styles.borderSize)},"
                     f"MarginV={int(subtitles_data.styles.marginV)},"
                     f"Alignment={alignment},"
-                    f"MarginL=0,"  # Set to 0 to allow full width for centering
-                    f"MarginR=0,"  # Set to 0 to allow full width for centering
+                    f"MarginL=0,"
+                    f"MarginR=0,"
                     f"Bold=0,"
                     f"Italic=0,"
                     f"Spacing=0,"
                     f"BorderStyle=1,"
                     f"Shadow=0,"
-                    f"MarginH=0"  # Add horizontal margin to ensure proper centering
+                    f"MarginH=0"
                 )
                 
                 # Add subtitle filter with proper escaping
@@ -410,9 +424,6 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                 ]
                 logger.info(f"Added subtitle filter with path: {srt_path_str}")
                 logger.info(f"Subtitle style: {subtitle_style}")
-                logger.info(f"Primary color: {primary_color}")
-                logger.info(f"Outline color: {outline_color}")
-                logger.info(f"Alignment: {alignment}")
             else:
                 filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
         else:
@@ -421,22 +432,8 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
         logger.error(f"Subtitle processing error: {str(e)}")
         filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
     
-    cmd = [
-        "ffmpeg",
-        "-y",
-        "-i", input_path,
-        "-filter_complex", "".join(filter_complex),
-        "-map", "[v]",
-        "-map", "[a]",
-        "-c:v", "mpeg4",  # changed from 'libx264' to 'mpeg4' since libx264 is unavailable
-        "-q:v", "1",        # quality scale (lower is better, 1-31)
-        "-pix_fmt", "yuv420p",
-        "-movflags", "+faststart",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        output_path
-    ]
-    
+    # Build and execute FFmpeg command
+    cmd = build_ffmpeg_command(input_path, output_path, filter_complex)
     logger.info(f"Running FFmpeg command: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
     

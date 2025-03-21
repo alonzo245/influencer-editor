@@ -37,15 +37,15 @@ export default function SubtitlesSection({
   const [volume, setVolume] = useState(100);
   const [styles, setStyles] = useState<SubtitleStyles>(
     initialStyles || {
-      fontSize: 24,
-      color: "#FFFFFF",
-      borderSize: 2,
+      fontSize: 16,
+      color: "#fcfc00",
+      borderSize: 1,
       borderColor: "#000000",
       verticalPosition: 90,
       volume: 100,
-      textDirection: "ltr",
+      textDirection: "rtl",
       marginV: 100, // Default to middle
-      alignment: "5", // Default to middle center
+      alignment: "2", // Default to middle center
     }
   );
   const [isPlaying, setIsPlaying] = useState(false);
@@ -185,6 +185,7 @@ export default function SubtitlesSection({
             rows={10}
             value={subtitleText}
             onChange={(e) => setSubtitleText(e.target.value)}
+            dir="rtl"
           />
 
           <div
