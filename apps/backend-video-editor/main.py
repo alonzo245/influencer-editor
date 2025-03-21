@@ -380,15 +380,26 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                 primary_color = hex_to_ffmpeg_color(subtitles_data.styles.color)
                 outline_color = hex_to_ffmpeg_color(subtitles_data.styles.borderColor)
                 
+                # Ensure alignment is a number
+                alignment = int(subtitles_data.styles.alignment)
+                
                 # Create subtitle filter with styling
                 subtitle_style = (
                     f"FontName=Arial,"
-                    f"FontSize={subtitles_data.styles.fontSize},"
+                    f"FontSize={int(subtitles_data.styles.fontSize)},"
                     f"PrimaryColour={primary_color},"
                     f"OutlineColour={outline_color},"
-                    f"Outline={subtitles_data.styles.borderSize},"
-                    f"MarginV={subtitles_data.styles.marginV},"
-                    f"Alignment={subtitles_data.styles.alignment}"
+                    f"Outline={int(subtitles_data.styles.borderSize)},"
+                    f"MarginV={int(subtitles_data.styles.marginV)},"
+                    f"Alignment={alignment},"
+                    f"MarginL=0,"  # Set to 0 to allow full width for centering
+                    f"MarginR=0,"  # Set to 0 to allow full width for centering
+                    f"Bold=0,"
+                    f"Italic=0,"
+                    f"Spacing=0,"
+                    f"BorderStyle=1,"
+                    f"Shadow=0,"
+                    f"MarginH=0"  # Add horizontal margin to ensure proper centering
                 )
                 
                 # Add subtitle filter with proper escaping
@@ -401,6 +412,7 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
                 logger.info(f"Subtitle style: {subtitle_style}")
                 logger.info(f"Primary color: {primary_color}")
                 logger.info(f"Outline color: {outline_color}")
+                logger.info(f"Alignment: {alignment}")
             else:
                 filter_complex = [f"[0:v]crop={new_width}:{new_height}:{x_offset}:{y_offset}[v];[0:a]volume={volume_factor}[a]"]
         else:
