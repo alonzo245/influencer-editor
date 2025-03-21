@@ -428,10 +428,8 @@ def crop_video(input_path: str, output_path: str, target_ratio: str, position: f
         "-filter_complex", "".join(filter_complex),
         "-map", "[v]",
         "-map", "[a]",
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "23",
-        "-profile:v", "main",
+        "-c:v", "mpeg4",  # changed from 'libx264' to 'mpeg4' since libx264 is unavailable
+        "-q:v", "1",        # quality scale (lower is better, 1-31)
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         "-c:a", "aac",
