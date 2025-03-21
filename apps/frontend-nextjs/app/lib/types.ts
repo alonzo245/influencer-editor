@@ -23,6 +23,7 @@ export interface SubtitleOptions {
 
 export const SUBTITLE_FONTS = [
   "kcalBrecapS",
+  "lairA",
   "ralugeRnamokifA",
   "ralugeRaksalA",
   "dloBsuedamA",

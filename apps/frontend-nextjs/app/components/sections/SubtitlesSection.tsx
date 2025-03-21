@@ -184,6 +184,30 @@ export default function SubtitlesSection({
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-[70%]">
+          <a
+            href="https://chatgpt.com/"
+            target="_blank"
+            className="text-blue-500 underline mb-4 block flex items-center gap-1"
+          >
+            Fix typos and translations
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
+          <textarea
+            className="w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-black"
+            value={"תקן שגיאות כתיב ב srt הבא: "}
+          />
           <textarea
             id="subtitle-text"
             className="w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-black"
@@ -333,7 +357,7 @@ export default function SubtitlesSection({
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <label className=" block text-sm font-medium text-black mb-2">
                   Subtitle Font
                 </label>
                 <select
