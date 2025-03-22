@@ -179,7 +179,6 @@ export default function Home() {
 
   const handleRatioSelect = (ratio: "16:9" | "9:16") => {
     setSelectedRatio(ratio);
-    setCurrentSection("crop");
   };
 
   const handleCropSettings = (position: number) => {
@@ -424,6 +423,7 @@ export default function Home() {
             <h2 className="text-2xl font-semibold text-gray-100">
               Choose Aspect Ratio
             </h2>
+
             <div className="flex gap-4">
               <button
                 onClick={() => handleRatioSelect("16:9")}
@@ -442,19 +442,16 @@ export default function Home() {
                 9:16 (Vertical)
               </button>
             </div>
+            <VideoProcessor
+              onProcessVideo={(options) =>
+                handleCropSettings(options.cropPosition)
+              }
+              fileId={videoMetadata.fileId}
+              localVideoUrl={videoMetadata.localUrl}
+              dimensions={videoMetadata.dimensions}
+              aspectRatio={selectedRatio}
+            />
           </div>
-        )}
-
-        {currentSection === "crop" && videoMetadata && (
-          <VideoProcessor
-            onProcessVideo={(options) =>
-              handleCropSettings(options.cropPosition)
-            }
-            fileId={videoMetadata.fileId}
-            localVideoUrl={videoMetadata.localUrl}
-            dimensions={videoMetadata.dimensions}
-            aspectRatio={selectedRatio}
-          />
         )}
 
         {currentSection === "trim" && (

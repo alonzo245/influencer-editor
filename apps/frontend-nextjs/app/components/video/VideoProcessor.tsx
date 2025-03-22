@@ -169,7 +169,7 @@ export default function VideoProcessor({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mt-10">
         <h2 className="text-2xl font-semibold text-gray-100">
           Adjust Crop Position
         </h2>
