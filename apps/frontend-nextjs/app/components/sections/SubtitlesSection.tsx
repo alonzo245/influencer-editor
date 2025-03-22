@@ -288,12 +288,12 @@ export default function SubtitlesSection({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-white">
+                <label className=" block text-sm font-medium text-white">
                   Verticle Alignment
                 </label>
                 <select
                   value={styles.alignment}
-                  className="w-full p-2 border border-gray-300 rounded text-white"
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-200"
                   onChange={(e) =>
                     handleStyleChange("alignment", e.target.value)
                   }
