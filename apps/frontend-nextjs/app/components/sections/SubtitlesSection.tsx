@@ -37,6 +37,7 @@ export default function SubtitlesSection({
   videoRatio,
 }: SubtitlesSectionProps) {
   const [subtitleText, setSubtitleText] = useState<string>(srtContent || "");
+  const [showCopyMessage, setShowCopyMessage] = useState(false);
 
   const [volume, setVolume] = useState(100);
   const [styles, setStyles] = useState<SubtitleStyles>(
@@ -200,10 +201,18 @@ export default function SubtitlesSection({
               />
             </svg>
           </a>
-          <textarea
-            className="bg-gray-900 w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-white"
+          {/* <textarea
+            rows={1}
+            dir="rtl"
+            className="bg-gray-900 w-full p-3 border border-gray-300 rounded-lg mb-4 font-mono text-white"
             value={"תקן שגיאות כתיב ב srt הבא ואל תוסיף מקפים: "}
           />
+          <textarea
+            rows={1}
+            dir="rtl"
+            className="bg-gray-900 w-full p-3 border border-gray-300 rounded-lg mb-4 font-mono text-white"
+            value={"תכתוב לי פוסט שיגרום לגולשים לראות את הוידאו ולהגיב עליו: "}
+          /> */}
           <textarea
             id="subtitle-text"
             className="bg-gray-900 w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-white"
@@ -213,6 +222,72 @@ export default function SubtitlesSection({
             dir="rtl"
           />
 
+          <button
+            onClick={async () => {
+              const textarea = document.getElementById(
+                "subtitle-text"
+              ) as HTMLTextAreaElement;
+              if (textarea) {
+                try {
+                  await navigator.clipboard.writeText(textarea.value);
+                  setShowCopyMessage(true);
+                  setTimeout(() => setShowCopyMessage(false), 1000);
+                } catch (err) {
+                  console.error("Failed to copy text:", err);
+                }
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4 transition-colors relative"
+          >
+            Copy Text
+          </button>
+          <button
+            onClick={async () => {
+              const textarea = document.getElementById(
+                "subtitle-text"
+              ) as HTMLTextAreaElement;
+              if (textarea) {
+                try {
+                  const textToCopy = `תקן שגיאות כתיב ב srt הבא ואל תוסיף מקפים: ${textarea.value}`;
+                  await navigator.clipboard.writeText(textToCopy);
+                  setShowCopyMessage(true);
+                  setTimeout(() => setShowCopyMessage(false), 1000);
+                } catch (err) {
+                  console.error("Failed to copy text:", err);
+                }
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4 transition-colors relative ml-2"
+          >
+            Copy SRT to Fix Typos
+          </button>
+
+          <button
+            onClick={async () => {
+              const textarea = document.getElementById(
+                "subtitle-text"
+              ) as HTMLTextAreaElement;
+              if (textarea) {
+                try {
+                  const textToCopy = `תכתוב לי פוסט שיגרום לגולשים לראות את הוידאו ולהגיב עליו:  ${textarea.value}`;
+                  await navigator.clipboard.writeText(textToCopy);
+                  setShowCopyMessage(true);
+                  setTimeout(() => setShowCopyMessage(false), 1000);
+                } catch (err) {
+                  console.error("Failed to copy text:", err);
+                }
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4 transition-colors relative ml-2"
+          >
+            Copy write a post on social media
+          </button>
+
+          {showCopyMessage && (
+            <div className="mb-5 bg-green-500 text-white px-3 py-1 rounded-md text-sm whitespace-nowrap">
+              Copied!
+            </div>
+          )}
           <div
             id="subtitle-customization"
             className="bg-gray-900 p-4 rounded-lg mb-4 text-white"
