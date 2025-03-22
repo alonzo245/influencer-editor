@@ -464,7 +464,9 @@ export default function Home() {
         )}
 
         {currentSection === "process" && (
-          <ProgressBar progress={progress} text="Processing video..." />
+          <div className="space-y-4 mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
+            <ProgressBar progress={progress} text="Processing video..." />
+          </div>
         )}
 
         {currentSection === "download" && processedFiles.videoUrl && (

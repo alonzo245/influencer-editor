@@ -29,14 +29,18 @@ export default function ExtractSpeechToText({
   };
 
   return (
-    <div className="space-y-4 mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
-      <h2 className="text-2xl font-semibold text-gray-100">
-        Extracting Speech from Video
-      </h2>
-      {/* <ProgressBar progress={progress} text={text} /> */}
-      <div className="text-gray-300 text-xl font-medium text-center">
-        Elapsed time: {formatTime(elapsedTime)}
+    <>
+      <div className="space-y-4 mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
+        <h2 className="text-2xl font-semibold text-gray-100">
+          Extracting Speech from Video
+        </h2>
+
+        <ProgressBar progress={progress} text={text} />
+
+        <div className="text-gray-300 text-xl font-medium text-center mt-5">
+          Elapsed time: {formatTime(elapsedTime)}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
