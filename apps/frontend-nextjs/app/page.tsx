@@ -6,6 +6,7 @@ import VideoProcessor from "./components/video/VideoProcessor";
 import ProgressBar from "./components/ui/ProgressBar";
 import DownloadSection from "./components/sections/DownloadSection";
 import SubtitlesSection from "./components/sections/SubtitlesSection";
+import TrimSection from "./components/sections/TrimSection";
 import type { ProcessingOptions } from "./lib/types";
 import { INITIAL_SUBTITLE_FONTS } from "./lib/consts";
 
@@ -42,6 +43,7 @@ export default function Home() {
     | "upload"
     | "ratio"
     | "crop"
+    | "trim"
     | "transcribe"
     | "extracting"
     | "edit"
@@ -55,6 +57,7 @@ export default function Home() {
   );
   const [selectedRatio, setSelectedRatio] = useState<"16:9" | "9:16">("9:16");
   const [cropPosition, setCropPosition] = useState(50);
+  const [trimData, setTrimData] = useState<[number, number]>([0, 0]);
   // Transcription options
   const [transcriptionEnabled, setTranscriptionEnabled] = useState(true);
   const [burnSubtitles, setBurnSubtitles] = useState(true);
@@ -73,7 +76,7 @@ export default function Home() {
 
     try {
       setIsDeletingAll(true);
-      setError(null);
+      setError("");
 
       const response = await fetch(`http://localhost:8000/api/files/all`, {
         method: "DELETE",
@@ -181,6 +184,11 @@ export default function Home() {
 
   const handleCropSettings = (position: number) => {
     setCropPosition(position);
+    setCurrentSection("trim");
+  };
+
+  const handleTrimSettings = (trim: [number, number]) => {
+    setTrimData(trim);
     setCurrentSection("transcribe");
   };
 
@@ -406,6 +414,8 @@ export default function Home() {
           <VideoUploader
             onVideoSelect={handleVideoSelect}
             handleDeleteAllFiles={handleDeleteAllFiles}
+            isDeletingAll={isDeletingAll}
+            setIsDeletingAll={setIsDeletingAll}
           />
         )}
 
@@ -444,6 +454,13 @@ export default function Home() {
             localVideoUrl={videoMetadata.localUrl}
             dimensions={videoMetadata.dimensions}
             aspectRatio={selectedRatio}
+          />
+        )}
+
+        {currentSection === "trim" && (
+          <TrimSection
+            onTrimSettings={handleTrimSettings}
+            trimData={trimData}
           />
         )}
 
@@ -538,6 +555,10 @@ export default function Home() {
             onNewVideo={handleNewVideo}
             onBackToEdit={handleBackToEdit}
             fileId={videoMetadata?.fileId || ""}
+            isDeletingAll={isDeletingAll}
+            setIsDeletingAll={setIsDeletingAll}
+            isDeleting={isDeleting}
+            setIsDeleting={setIsDeleting}
           />
         )}
       </div>
