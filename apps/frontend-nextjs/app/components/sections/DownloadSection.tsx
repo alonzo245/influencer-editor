@@ -59,7 +59,6 @@ export default function DownloadSection({
 
   return (
     <div className="mt-6 text-center">
-      <p className="text-gray-300 mb-4">Your files are ready!</p>
       <div className="space-y-3">
         {/* Download Video Button */}
         <a

@@ -9,6 +9,7 @@ import SubtitlesSection from "./components/sections/SubtitlesSection";
 import TrimSection from "./components/sections/TrimSection";
 import TranscribeVideo from "./components/sections/TranscribeVideo";
 import ExtractSpeechToText from "./components/sections/ExtractSpeechToText";
+import RatioVideo from "./components/sections/RatioVideo";
 import type { ProcessingOptions } from "./lib/types";
 import { INITIAL_SUBTITLE_FONTS } from "./lib/consts";
 
@@ -422,36 +423,15 @@ export default function Home() {
 
         {currentSection === "ratio" && videoMetadata && (
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-100">
-              1. Choose Aspect Ratio
-            </h2>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => handleRatioSelect("16:9")}
-                className={`p-4 rounded-lg ${
-                  selectedRatio === "16:9" ? "bg-blue-600" : "bg-gray-700"
-                }`}
-              >
-                16:9 (Horizontal)
-              </button>
-              <button
-                onClick={() => handleRatioSelect("9:16")}
-                className={`p-4 rounded-lg ${
-                  selectedRatio === "9:16" ? "bg-blue-600" : "bg-gray-700"
-                }`}
-              >
-                9:16 (Vertical)
-              </button>
-            </div>
-            <VideoProcessor
+            <RatioVideo
+              selectedRatio={selectedRatio}
+              onRatioSelect={handleRatioSelect}
               onProcessVideo={(options) =>
                 handleCropSettings(options.cropPosition)
               }
               fileId={videoMetadata.fileId}
               localVideoUrl={videoMetadata.localUrl}
               dimensions={videoMetadata.dimensions}
-              aspectRatio={selectedRatio}
             />
 
             <TranscribeVideo
