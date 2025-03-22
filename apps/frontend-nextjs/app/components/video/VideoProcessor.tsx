@@ -130,6 +130,7 @@ export default function VideoProcessor({
     newPosition = Math.max(0, Math.min(100, newPosition));
 
     setCropPosition(newPosition);
+    handleRangeOnChange(newPosition);
   };
 
   const handleMouseUp = () => {
@@ -158,6 +159,17 @@ export default function VideoProcessor({
     }
   };
 
+  const handleRangeOnChange = (newPosition: number) => {
+    setCropPosition(newPosition);
+
+    onProcessVideo({
+      cropPosition,
+      aspectRatio,
+      language: language || undefined,
+      burnSubtitles,
+    });
+  };
+
   const handleSubmit = () => {
     onProcessVideo({
       cropPosition,
@@ -171,7 +183,7 @@ export default function VideoProcessor({
     <div className="space-y-6">
       <div className="flex justify-between items-center mt-10">
         <h2 className="text-2xl font-semibold text-gray-100">
-          Adjust Crop Position
+          2. Adjust Crop Position
         </h2>
         <div className="text-gray-300 text-sm space-y-1">
           <div>
@@ -192,7 +204,7 @@ export default function VideoProcessor({
             min="0"
             max="100"
             value={cropPosition}
-            onChange={(e) => setCropPosition(parseInt(e.target.value))}
+            onChange={(e) => handleRangeOnChange(parseInt(e.target.value))}
             className="w-full"
             data-testid="crop-slider"
           />
@@ -262,7 +274,7 @@ export default function VideoProcessor({
             </div>
           </div>
 
-          <div className="mt-4 flex gap-4">
+          <div className="mt-1 flex gap-4">
             <button
               onClick={togglePlay}
               className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
@@ -306,12 +318,12 @@ export default function VideoProcessor({
           </div>
         </div>
 
-        <button
+        {/* <button
           onClick={handleSubmit}
           className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Continue
-        </button>
+        </button> */}
       </div>
     </div>
   );

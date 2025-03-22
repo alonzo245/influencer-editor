@@ -20,9 +20,9 @@ export default function TranscribeVideo({
   onTranscriptionSettings,
 }: TranscribeVideoProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-20">
       <h2 className="text-2xl font-semibold text-gray-100">
-        Transcription Options
+        3. Transcription Options
       </h2>
       <div className="space-y-4">
         <label className="flex items-center space-x-2">

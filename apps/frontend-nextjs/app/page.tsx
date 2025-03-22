@@ -185,7 +185,7 @@ export default function Home() {
 
   const handleCropSettings = (position: number) => {
     setCropPosition(position);
-    setCurrentSection("trim");
+    // setCurrentSection("trim");
   };
 
   const handleTrimSettings = (trim: [number, number]) => {
@@ -423,7 +423,7 @@ export default function Home() {
         {currentSection === "ratio" && videoMetadata && (
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold text-gray-100">
-              Choose Aspect Ratio
+              1. Choose Aspect Ratio
             </h2>
 
             <div className="flex gap-4">
@@ -453,6 +453,13 @@ export default function Home() {
               dimensions={videoMetadata.dimensions}
               aspectRatio={selectedRatio}
             />
+
+            <TranscribeVideo
+              transcriptionEnabled={transcriptionEnabled}
+              burnSubtitles={burnSubtitles}
+              language={language}
+              onTranscriptionSettings={handleTranscriptionSettings}
+            />
           </div>
         )}
 
@@ -460,15 +467,6 @@ export default function Home() {
           <TrimSection
             onTrimSettings={handleTrimSettings}
             trimData={trimData}
-          />
-        )}
-
-        {currentSection === "transcribe" && (
-          <TranscribeVideo
-            transcriptionEnabled={transcriptionEnabled}
-            burnSubtitles={burnSubtitles}
-            language={language}
-            onTranscriptionSettings={handleTranscriptionSettings}
           />
         )}
 

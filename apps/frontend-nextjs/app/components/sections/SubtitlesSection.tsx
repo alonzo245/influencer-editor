@@ -176,7 +176,7 @@ export default function SubtitlesSection({
 
   return (
     <div id="subtitle-editor" className="mt-4">
-      <h3 className="text-xl font-semibold mb-4">Edit Subtitles</h3>
+      <h3 className="text-xl font-semibold mb-4">5. Edit Subtitles</h3>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-[70%]">

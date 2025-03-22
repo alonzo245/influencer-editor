@@ -20,7 +20,7 @@ export default function TrimSection({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-gray-100">Trim Video</h2>
+      <h2 className="text-2xl font-semibold text-gray-100">4. Trim Video</h2>
       <div className="space-y-4">
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-200">
