@@ -59,6 +59,41 @@ export default function Home() {
   const [transcriptionEnabled, setTranscriptionEnabled] = useState(true);
   const [burnSubtitles, setBurnSubtitles] = useState(true);
   const [language, setLanguage] = useState<"english" | "hebrew">("hebrew");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+
+  const handleDeleteAllFiles = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete all files? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsDeletingAll(true);
+      setError(null);
+
+      const response = await fetch(`http://localhost:8000/api/files/all`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.detail?.message || "Failed to delete all files"
+        );
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete all files"
+      );
+      console.error("Error deleting all files:", err);
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
 
   // Processing state
   const [transcriptionData, setTranscriptionData] =
@@ -368,7 +403,10 @@ export default function Home() {
         )}
 
         {currentSection === "upload" && (
-          <VideoUploader onVideoSelect={handleVideoSelect} />
+          <VideoUploader
+            onVideoSelect={handleVideoSelect}
+            handleDeleteAllFiles={handleDeleteAllFiles}
+          />
         )}
 
         {currentSection === "ratio" && videoMetadata && (
@@ -492,6 +530,7 @@ export default function Home() {
 
         {currentSection === "download" && processedFiles.videoUrl && (
           <DownloadSection
+            handleDeleteAllFiles={handleDeleteAllFiles}
             videoUrl={processedFiles.videoUrl}
             filename={`processed_${processedFiles.videoUrl}.mp4`}
             srtUrl={processedFiles.srtUrl}

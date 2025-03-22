@@ -10,9 +10,15 @@ interface DownloadSectionProps {
   onNewVideo: () => void;
   onBackToEdit: () => void;
   fileId: string;
+  handleDeleteAllFiles: () => void;
+  isDeletingAll: boolean;
+  setIsDeletingAll: (isDeletingAll: boolean) => void;
+  isDeleting: boolean;
+  setIsDeleting: (isDeleting: boolean) => void;
 }
 
 export default function DownloadSection({
+  handleDeleteAllFiles,
   videoUrl,
   filename,
   srtUrl,
@@ -20,9 +26,11 @@ export default function DownloadSection({
   onNewVideo,
   onBackToEdit,
   fileId,
+  isDeletingAll,
+  setIsDeletingAll,
+  isDeleting,
+  setIsDeleting,
 }: DownloadSectionProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleDeleteFiles = async () => {
@@ -46,39 +54,6 @@ export default function DownloadSection({
       console.error("Error deleting files:", err);
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  const handleDeleteAllFiles = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to delete all files? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setIsDeletingAll(true);
-      setError(null);
-
-      const response = await fetch(`http://localhost:8000/api/files/all`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.detail?.message || "Failed to delete all files"
-        );
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete all files"
-      );
-      console.error("Error deleting all files:", err);
-    } finally {
-      setIsDeletingAll(false);
     }
   };
 
