@@ -177,10 +177,6 @@ export default function SubtitlesSection({
   return (
     <div id="subtitle-editor" className="mt-4">
       <h3 className="text-xl font-semibold mb-4">Edit Subtitles</h3>
-      <div className="alert alert-info bg-blue-50 p-4 rounded-lg mb-4 text-black">
-        Edit the subtitles below. Keep the timing and subtitle numbers intact
-        for proper synchronization.
-      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-[70%]">
@@ -205,12 +201,12 @@ export default function SubtitlesSection({
             </svg>
           </a>
           <textarea
-            className="w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-black"
+            className="bg-gray-900 w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-white"
             value={"תקן שגיאות כתיב ב srt הבא ואל תוסיף מקפים: "}
           />
           <textarea
             id="subtitle-text"
-            className="w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-black"
+            className="bg-gray-900 w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-white"
             rows={10}
             value={subtitleText}
             onChange={(e) => setSubtitleText(e.target.value)}
@@ -219,12 +215,12 @@ export default function SubtitlesSection({
 
           <div
             id="subtitle-customization"
-            className="bg-gray-50 p-4 rounded-lg mb-4"
+            className="bg-gray-900 p-4 rounded-lg mb-4 text-white"
           >
             <h4 className="text-lg font-semibold mb-3">Subtitle Appearance</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Font Size
                 </label>
                 <input
@@ -237,7 +233,7 @@ export default function SubtitlesSection({
                     handleStyleChange("fontSize", parseInt(e.target.value))
                   }
                 />
-                <div className="text-sm text-gray-600 flex justify-between">
+                <div className="text-sm text-white flex justify-between">
                   <span>16px</span>
                   <span ref={sizeValueRef}>{styles.fontSize}px</span>
                   <span>72px</span>
@@ -245,7 +241,7 @@ export default function SubtitlesSection({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Font Color
                 </label>
                 <input
@@ -257,7 +253,7 @@ export default function SubtitlesSection({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Border Size
                 </label>
                 <input
@@ -270,7 +266,7 @@ export default function SubtitlesSection({
                     handleStyleChange("borderSize", parseInt(e.target.value))
                   }
                 />
-                <div className="text-sm text-gray-600 flex justify-between text-black">
+                <div className="text-sm text-white flex justify-between text-white">
                   <span>None</span>
                   <span ref={borderValueRef}>{styles.borderSize}px</span>
                   <span>5px</span>
@@ -278,7 +274,7 @@ export default function SubtitlesSection({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Border Color
                 </label>
                 <input
@@ -292,30 +288,30 @@ export default function SubtitlesSection({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Verticle Alignment
                 </label>
                 <select
                   value={styles.alignment}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
+                  className="w-full p-2 border border-gray-300 rounded text-white"
                   onChange={(e) =>
                     handleStyleChange("alignment", e.target.value)
                   }
                 >
-                  <option value="8" className="text-black">
+                  <option value="8" className="text-white">
                     Top Center
                   </option>
-                  <option value="5" className="text-black">
+                  <option value="5" className="text-white">
                     Middle Center
                   </option>
-                  <option value="2" className="text-black">
+                  <option value="2" className="text-white">
                     Bottom Center
                   </option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Volume
                 </label>
                 <input
@@ -328,7 +324,7 @@ export default function SubtitlesSection({
                     handleStyleChange("volume", parseInt(e.target.value))
                   }
                 />
-                <div className="text-sm text-gray-600 flex justify-between">
+                <div className="text-sm text-white flex justify-between">
                   <span>Mute</span>
                   <span>{styles.volume}%</span>
                   <span>300%</span>
@@ -336,7 +332,7 @@ export default function SubtitlesSection({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">
+                <label className="block text-sm font-medium text-white">
                   Verticle Padding (0-200)
                 </label>
                 <input
@@ -349,7 +345,7 @@ export default function SubtitlesSection({
                     handleStyleChange("marginV", parseInt(e.target.value))
                   }
                 />
-                <div className="text-sm text-gray-600 flex justify-between">
+                <div className="text-sm text-white flex justify-between">
                   <span>0</span>
                   <span>{styles.marginV}</span>
                   <span>200</span>
@@ -357,7 +353,7 @@ export default function SubtitlesSection({
               </div>
 
               <div className="relative">
-                <label className=" block text-sm font-medium text-black mb-2">
+                <label className=" block text-sm font-medium text-white mb-2">
                   Subtitle Font
                 </label>
                 <select

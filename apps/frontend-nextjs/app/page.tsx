@@ -7,6 +7,8 @@ import ProgressBar from "./components/ui/ProgressBar";
 import DownloadSection from "./components/sections/DownloadSection";
 import SubtitlesSection from "./components/sections/SubtitlesSection";
 import TrimSection from "./components/sections/TrimSection";
+import TranscribeVideo from "./components/sections/TranscribeVideo";
+import ExtractSpeechToText from "./components/sections/ExtractSpeechToText";
 import type { ProcessingOptions } from "./lib/types";
 import { INITIAL_SUBTITLE_FONTS } from "./lib/consts";
 
@@ -462,70 +464,15 @@ export default function Home() {
         )}
 
         {currentSection === "transcribe" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-100">
-              Transcription Options
-            </h2>
-            <div className="space-y-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={transcriptionEnabled}
-                  onChange={(e) => setTranscriptionEnabled(e.target.checked)}
-                  className="form-checkbox"
-                />
-                <span>Enable Speech-to-Text</span>
-              </label>
-
-              {transcriptionEnabled && (
-                <>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={burnSubtitles}
-                      onChange={(e) => setBurnSubtitles(e.target.checked)}
-                      className="form-checkbox"
-                    />
-                    <span>Burn Subtitles into Video</span>
-                  </label>
-
-                  <select
-                    value={language}
-                    onChange={(e) =>
-                      setLanguage(e.target.value as "english" | "hebrew")
-                    }
-                    className="form-select bg-gray-700 text-white"
-                  >
-                    <option value="english">English</option>
-                    <option value="hebrew">Hebrew</option>
-                  </select>
-                </>
-              )}
-
-              <button
-                onClick={() =>
-                  handleTranscriptionSettings(
-                    transcriptionEnabled,
-                    burnSubtitles,
-                    language
-                  )
-                }
-                className="px-4 py-2 bg-blue-600 rounded-lg"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
+          <TranscribeVideo
+            transcriptionEnabled={transcriptionEnabled}
+            burnSubtitles={burnSubtitles}
+            language={language}
+            onTranscriptionSettings={handleTranscriptionSettings}
+          />
         )}
 
-        {currentSection === "extracting" && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-100">
-              Extracting Speech from Video
-            </h2>
-            <ProgressBar progress={100} text="This may take a few minutes..." />
-          </div>
-        )}
+        {currentSection === "extracting" && <ExtractSpeechToText />}
 
         {currentSection === "edit" && (
           <SubtitlesSection
