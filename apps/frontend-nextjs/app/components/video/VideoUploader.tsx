@@ -37,7 +37,7 @@ export default function VideoUploader({
   });
 
   return (
-    <div>
+    <div className="mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
       <div
         {...getRootProps()}
         className={`drop-zone rounded-lg p-8 text-center border-2 border-dashed transition-colors

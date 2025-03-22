@@ -176,7 +176,10 @@ export default function SubtitlesSection({
   if (!isVisible) return null;
 
   return (
-    <div id="subtitle-editor" className="mt-4">
+    <div
+      id="subtitle-editor"
+      className="mt-4 mx-auto bg-gray-800 rounded-lg shadow-xl p-6"
+    >
       <h3 className="text-xl font-semibold mb-4">5. Edit Subtitles</h3>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -201,18 +204,7 @@ export default function SubtitlesSection({
               />
             </svg>
           </a>
-          {/* <textarea
-            rows={1}
-            dir="rtl"
-            className="bg-gray-900 w-full p-3 border border-gray-300 rounded-lg mb-4 font-mono text-white"
-            value={"תקן שגיאות כתיב ב srt הבא ואל תוסיף מקפים: "}
-          />
-          <textarea
-            rows={1}
-            dir="rtl"
-            className="bg-gray-900 w-full p-3 border border-gray-300 rounded-lg mb-4 font-mono text-white"
-            value={"תכתוב לי פוסט שיגרום לגולשים לראות את הוידאו ולהגיב עליו: "}
-          /> */}
+
           <textarea
             id="subtitle-text"
             className="bg-gray-900 w-full p-4 border border-gray-300 rounded-lg mb-4 font-mono text-white"
@@ -239,7 +231,7 @@ export default function SubtitlesSection({
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4 transition-colors relative"
           >
-            Copy Text
+            Copy SRT
           </button>
           <button
             onClick={async () => {
@@ -259,7 +251,7 @@ export default function SubtitlesSection({
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4 transition-colors relative ml-2"
           >
-            Copy SRT to Fix Typos
+            Copy SRT & Fix Typos
           </button>
 
           <button
@@ -280,7 +272,7 @@ export default function SubtitlesSection({
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mb-4 transition-colors relative ml-2"
           >
-            Copy write a post on social media
+            Copy SRT & generate post
           </button>
 
           {showCopyMessage && (
@@ -472,7 +464,9 @@ export default function SubtitlesSection({
             {/* Video Preview */}
             {localVideoUrl && (
               <div>
-                <h4 className="text-lg font-semibold mb-3">Video Preview</h4>
+                <h4 className="text-lg font-semibold mb-3">
+                  Subtitles Preview
+                </h4>
                 <div
                   className="relative w-full bg-gray-900 rounded-lg overflow-hidden"
                   style={{

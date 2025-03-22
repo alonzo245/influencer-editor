@@ -20,7 +20,7 @@ export default function TranscribeVideo({
   onTranscriptionSettings,
 }: TranscribeVideoProps) {
   return (
-    <div className="space-y-4 mt-20">
+    <div className="space-y-4 mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
       <h2 className="text-2xl font-semibold text-gray-100">
         3. Transcription Options
       </h2>
@@ -38,7 +38,7 @@ export default function TranscribeVideo({
         </label>
 
         {transcriptionEnabled && (
-          <>
+          <div className="flex items-center space-x-2">
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -64,12 +64,12 @@ export default function TranscribeVideo({
                   e.target.value as "english" | "hebrew"
                 )
               }
-              className="form-select bg-gray-700 text-white"
+              className="form-select bg-gray-700 text-white p-3 rounded-lg"
             >
               <option value="english">English</option>
               <option value="hebrew">Hebrew</option>
             </select>
-          </>
+          </div>
         )}
 
         <button

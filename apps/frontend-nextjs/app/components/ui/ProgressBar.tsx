@@ -5,7 +5,7 @@ interface ProgressBarProps {
 
 export default function ProgressBar({ progress, text }: ProgressBarProps) {
   return (
-    <div className="mt-6">
+    <div className="mt-6 mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
       <div className="w-full bg-gray-700 rounded-full h-2.5">
         <div
           className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"

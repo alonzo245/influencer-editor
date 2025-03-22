@@ -6,12 +6,12 @@ import VideoProcessor from "./components/video/VideoProcessor";
 import ProgressBar from "./components/ui/ProgressBar";
 import DownloadSection from "./components/sections/DownloadSection";
 import SubtitlesSection from "./components/sections/SubtitlesSection";
-import TrimSection from "./components/sections/TrimSection";
 import TranscribeVideo from "./components/sections/TranscribeVideo";
 import ExtractSpeechToText from "./components/sections/ExtractSpeechToText";
 import RatioVideo from "./components/sections/RatioVideo";
 import type { ProcessingOptions } from "./lib/types";
 import { INITIAL_SUBTITLE_FONTS } from "./lib/consts";
+import TrimSection from "./components/sections/TrimSection";
 
 type VideoMetadata = {
   fileId: string;
@@ -405,7 +405,7 @@ export default function Home() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="max-w-[1200px] mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
+      <div className="max-w-[1200px] mx-auto rounded-lg shadow-xl p-6">
         {error && (
           <div className="mb-4 p-4 bg-red-500 text-white rounded-lg">
             {error}

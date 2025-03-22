@@ -58,7 +58,7 @@ export default function DownloadSection({
   };
 
   return (
-    <div className="mt-6 text-center">
+    <div className="mt-6 text-center mx-auto bg-gray-800 rounded-lg shadow-xl p-6">
       <div className="space-y-3">
         {/* Download Video Button */}
         <a
